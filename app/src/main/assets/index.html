@@ -1076,6 +1076,19 @@ function fmtTxt(n) { return fmt(n, Math.abs(n) % 1 < 0.0001 ? 0 : 2); }
 /* ---- звук лопающегося шарика (Web Audio, без файлов) ---- */
 var AC = null;
 
+/* разблокировка звука внутри пользовательского жеста */
+function unlockAudio() {
+  try {
+    if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === 'suspended') AC.resume();
+    var b = AC.createBuffer(1, 1, AC.sampleRate);
+    var s = AC.createBufferSource();
+    s.buffer = b;
+    s.connect(AC.destination);
+    s.start(0);
+  } catch (e) {}
+}
+
 function popSound(volume) {
   try {
     if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
@@ -1266,6 +1279,7 @@ function saveReadings(btn) {
 
   state.data.records[mk] = obj;
   persist();
+  unlockAudio();
   launchBalloons();
   toast('Сохранено: ' + monthLabel(mk));
   render();
