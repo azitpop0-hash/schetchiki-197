@@ -1,0 +1,1403 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#171210">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Счётчики">
+<title>Счётчики · кв. 197</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+/* ===== Счётчики 197 — тёплая ретро-палитра ===== */
+:root{
+  --bg:#171210;
+  --bg2:#1f1815;
+  --card:#2a211c;
+  --card2:#332821;
+  --line:#453529;
+  --text:#f2e9dc;
+  --muted:#a8978a;
+  --brass:#c9a227;
+  --brass2:#e2c158;
+  --green:#7fa650;
+  --cold:#5aa9c9;
+  --hot:#d0714f;
+  --elec:#d9b53c;
+  --gas:#9a8fd0;
+  --danger:#d05252;
+  --r:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font:16px/1.45 -apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;
+  padding-bottom:calc(86px + env(safe-area-inset-bottom));
+  overscroll-behavior-y:contain;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.hidden{display:none !important}
+
+/* ---------- шапка ---------- */
+header{
+  position:sticky;top:0;z-index:20;
+  background:linear-gradient(180deg,#241b17 0%,#1b1512 100%);
+  border-bottom:1px solid var(--line);
+  padding:calc(12px + env(safe-area-inset-top)) 14px 10px;
+}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .plate{
+  width:44px;height:30px;border-radius:6px;flex:0 0 auto;
+  background:linear-gradient(180deg,#f3ead7,#d9cdb4);
+  color:#2a2118;font-weight:800;letter-spacing:1px;
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.18),0 1px 3px rgba(0,0,0,.5);
+  font-variant-numeric:tabular-nums;
+}
+.brand h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.2px}
+.brand small{display:block;color:var(--muted);font-weight:400;font-size:12px;margin-top:1px}
+
+/* ---------- навигация по месяцам ---------- */
+.monthbar{display:flex;align-items:center;gap:8px;margin-top:10px}
+.monthbar .nav{
+  width:40px;height:40px;border-radius:12px;border:1px solid var(--line);
+  background:var(--card);color:var(--text);font-size:19px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+}
+.monthbar .nav:active{background:var(--card2)}
+.monthbar .mbtn{
+  flex:1;height:40px;border-radius:12px;border:1px solid var(--line);
+  background:var(--card);text-align:center;font-weight:600;font-size:15px;
+}
+.monthbar input[type=month]{
+  flex:1;height:40px;border-radius:12px;border:1px solid var(--brass);
+  background:var(--card);padding:0 10px;color-scheme:dark;
+}
+
+/* ---------- карточки ---------- */
+main{padding:12px 12px 20px;max-width:720px;margin:0 auto}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.25);
+}
+.card h2{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 10px;font-weight:700}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+
+/* ---------- поля показаний ---------- */
+.field{padding:10px 0;border-bottom:1px solid var(--line)}
+.field:last-child{border-bottom:0}
+.field .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.field .name{font-weight:600;font-size:15px}
+.field .acc{color:var(--muted);font-size:11.5px;letter-spacing:.03em;font-variant-numeric:tabular-nums}
+.field .row{display:flex;align-items:center;gap:10px;margin-top:8px}
+.field input[type=text]{
+  flex:1;min-width:0;height:52px;border-radius:12px;border:1px solid var(--line);
+  background:var(--bg2);padding:0 14px;font-size:22px;font-weight:600;
+  font-variant-numeric:tabular-nums;letter-spacing:.5px;
+}
+.field input[type=text]:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px rgba(201,162,39,.15)}
+.field input.bad{border-color:var(--danger);box-shadow:0 0 0 3px rgba(208,82,82,.15)}
+.field input.sus{border-color:#e3a15b;box-shadow:0 0 0 3px rgba(227,161,91,.18)}
+
+/* шарик «Мои денюжки» — только transform/opacity */
+/* воздушный шарик: глянцевый, с узелком и волнистой ниткой */
+.moneyball{
+  position:fixed;left:50%;bottom:-130px;margin-left:-38px;z-index:1500;
+  width:76px;height:94px;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:10.5px;font-weight:800;line-height:1.1;color:#fff;letter-spacing:.02em;
+  text-shadow:0 1px 2px rgba(0,45,12,.5);
+  background:radial-gradient(circle at 38% 28%,#8df0aa 0%,#4cc96f 34%,#28a04c 62%,#0f5f2c 100%);
+  border-radius:50% 50% 47% 47% / 57% 57% 43% 43%;
+  box-shadow:0 10px 20px rgba(0,0,0,.35),
+             inset -8px -10px 18px rgba(0,0,0,.22),
+             inset 6px 8px 14px rgba(255,255,255,.18);
+  pointer-events:none;will-change:transform,opacity;
+  animation:balloonUp 3.2s cubic-bezier(.3,.35,.4,1) forwards;
+}
+.moneyball .gloss{
+  position:absolute;top:11%;left:20%;width:28px;height:19px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.9),rgba(255,255,255,0) 70%);
+  transform:rotate(-22deg);
+}
+.moneyball .knot{
+  position:absolute;bottom:-8px;left:50%;margin-left:-6px;width:12px;height:11px;
+  background:linear-gradient(#2a9a4c,#14682f);border-radius:2px 2px 6px 6px;
+}
+.moneyball .mb-string{position:absolute;bottom:-60px;left:50%;margin-left:-10px;width:20px;height:54px}
+@keyframes balloonUp{
+  0%{transform:translate(0,0) rotate(-3deg);opacity:0}
+  10%{opacity:1}
+  35%{transform:translate(-14px,-34vh) rotate(4deg)}
+  65%{transform:translate(12px,-70vh) rotate(-4deg);opacity:1}
+  100%{transform:translate(-6px,-104vh) rotate(3deg);opacity:0}
+}
+
+.btn{
+  display:block;width:100%;height:52px;border-radius:14px;border:0;
+  background:linear-gradient(180deg,var(--brass2),var(--brass));color:#2a2118;
+  font-weight:800;font-size:16px;letter-spacing:.02em;
+  box-shadow:0 3px 0 #8d7119,0 6px 14px rgba(0,0,0,.35);
+}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #8d7119}
+.btn.ghost{background:var(--card2);color:var(--text);box-shadow:none;border:1px solid var(--line);font-weight:600}
+.btn.danger{background:transparent;color:#e88a8a;border:1px solid #6b3434;box-shadow:none;font-weight:600}
+.btn.sm{height:42px;font-size:14px;border-radius:12px}
+.btnrow{display:flex;gap:8px}
+.btnrow .btn{flex:1}
+
+/* ---------- расчёт ---------- */
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sum .item{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 11px}
+.sum .item .k{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.sum .item .v{font-size:19px;font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums}
+.sum .item .d{font-size:12px;color:var(--muted);margin-top:1px;font-variant-numeric:tabular-nums}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:0 0 auto}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.total .lbl{color:var(--muted);font-size:14px}
+.total .val{font-size:28px;font-weight:800;color:var(--brass2);font-variant-numeric:tabular-nums}
+
+/* ---------- архив ---------- */
+.arch{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.arch .head{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;gap:10px}
+.arch .m{font-weight:700;font-size:15px;text-transform:capitalize}
+.arch .t{font-weight:800;color:var(--brass2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.arch .body{border-top:1px solid var(--line);padding:4px 14px 12px;display:none}
+.arch.open .body{display:block}
+.arch table{width:100%;border-collapse:collapse;font-size:13.5px}
+.arch td{padding:6px 0;border-bottom:1px solid rgba(69,53,41,.5)}
+.arch td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.arch tr.grp td{color:var(--brass2);font-weight:700;background:rgba(201,162,39,.05)}
+.arch .acts{display:flex;gap:8px;margin-top:10px}
+
+/* ---------- график ---------- */
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:4px;-webkit-overflow-scrolling:touch}
+.chip{flex:0 0 auto;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card2);font-size:13px;white-space:nowrap}
+.chip.on{background:var(--brass);border-color:var(--brass);color:#2a2118;font-weight:700}
+.chartwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+svg.chart{display:block;min-width:100%}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.stats .s{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:9px}
+.stats .s .k{font-size:11.5px;color:var(--muted)}
+.stats .s .v{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+
+/* ---------- настройки ---------- */
+.tline{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.tline:last-child{border-bottom:0}
+.tline .nm{font-size:14.5px}
+.tline input{width:120px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);padding:0 10px;text-align:right;font-size:16px;font-variant-numeric:tabular-nums}
+.tline input:focus{outline:none;border-color:var(--brass)}
+.tver{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.tver .d{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.note{font-size:12.5px;color:var(--muted);line-height:1.45}
+.banner{background:#3a2a1c;border:1px solid #6b4a22;color:#f0c98a;border-radius:12px;padding:11px 12px;font-size:13px;margin-bottom:12px}
+
+/* ---------- таббар ---------- */
+nav.tabs{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  display:flex;background:rgba(27,21,18,.97);border-top:1px solid var(--line);
+  padding:6px 6px calc(6px + env(safe-area-inset-bottom));
+  backdrop-filter:blur(8px);
+}
+nav.tabs button{
+  flex:1;background:none;border:0;color:var(--muted);padding:6px 2px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;border-radius:12px;
+}
+nav.tabs button svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs button.on{color:var(--brass2)}
+
+/* ---------- заставка: дверь 197 ---------- */
+#splash{
+  position:fixed;inset:0;z-index:1000;background:#0d0a08;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  animation:splashOut .45s ease 2.5s forwards;
+}
+#splash.gone{opacity:0 !important;visibility:hidden !important;animation:none !important}
+@keyframes splashOut{to{opacity:0;visibility:hidden}}
+#splash .hall{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 0%,#3a2b21 0%,#1a1310 45%,#0b0806 100%)}
+#splash .wall{position:absolute;inset:0;opacity:.35;
+  background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 2px,transparent 2px 7px);
+}
+#splash .doorwrap{position:relative;width:min(74vw,340px);aspect-ratio:.56;
+  transform-origin:left center;will-change:transform,opacity;
+  animation:doorOpen .85s cubic-bezier(.5,0,.75,0) 2s forwards;
+}
+@keyframes doorOpen{to{transform:scaleX(.05);opacity:.2}}
+#splash svg.door{width:100%;height:100%;display:block}
+#splash .glow{position:absolute;inset:0;background:radial-gradient(55% 42% at 50% 58%,#ffe6b0 0%,rgba(255,214,140,.25) 40%,transparent 72%);
+  opacity:0;animation:glowIn .7s ease 2.15s forwards}
+@keyframes glowIn{to{opacity:.6}}
+/* акцент на номере: тёплая пульсация ореола (только opacity — дёшево) */
+#splash .plateglow{animation:platePulse 2.2s ease-in-out infinite}
+@keyframes platePulse{0%,100%{opacity:.55}50%{opacity:1}}
+#splash .hint{position:absolute;bottom:calc(18px + env(safe-area-inset-bottom));left:0;right:0;
+  text-align:center;color:#8b7a6c;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+#splash .bar{position:absolute;bottom:calc(44px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
+  width:120px;height:2px;background:#2a211c;border-radius:2px;overflow:hidden}
+#splash .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#8d7119,#e2c158);animation:load2s 2s linear forwards}
+@keyframes load2s{to{width:100%}}
+
+/* тост */
+#toast{
+  position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));
+  transform:translate(-50%,14px);z-index:900;
+  background:#3a2e25;border:1px solid #5b4838;color:#f6ecdd;
+  padding:11px 16px;border-radius:12px;font-size:13.5px;max-width:88vw;text-align:center;
+  opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;
+  box-shadow:0 8px 24px rgba(0,0,0,.5);
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<noscript><div style="position:fixed;inset:0;z-index:3000;background:#171210;color:#f2e9dc;padding:40px 24px;font:16px/1.5 sans-serif;text-align:center">Для работы приложения нужен JavaScript. Откройте файл в Google Chrome.</div></noscript>
+<div id="splash" aria-hidden="true">
+  <div class="hall"></div>
+  <div class="wall"></div>
+  <div class="doorwrap">
+    <svg class="door" viewBox="0 0 340 607" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="leather" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#6b4326"/>
+          <stop offset=".35" stop-color="#57331d"/>
+          <stop offset=".7" stop-color="#472917"/>
+          <stop offset="1" stop-color="#3a2113"/>
+        </linearGradient>
+        <radialGradient id="sheen" cx=".3" cy=".12" r=".8">
+          <stop offset="0" stop-color="#ffffff" stop-opacity=".17"/>
+          <stop offset=".5" stop-color="#ffffff" stop-opacity=".03"/>
+          <stop offset="1" stop-color="#000000" stop-opacity=".3"/>
+        </radialGradient>
+        <linearGradient id="frame" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#2c1a0e"/>
+          <stop offset=".5" stop-color="#4a2d19"/>
+          <stop offset="1" stop-color="#25150b"/>
+        </linearGradient>
+        <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f0d697"/>
+          <stop offset=".45" stop-color="#c9a227"/>
+          <stop offset="1" stop-color="#7d5f13"/>
+        </linearGradient>
+        <linearGradient id="enamel" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#fdf8ec"/>
+          <stop offset=".6" stop-color="#e9dfc7"/>
+          <stop offset="1" stop-color="#cbbfa3"/>
+        </linearGradient>
+        <radialGradient id="warm" cx=".5" cy=".5" r=".5">
+          <stop offset="0" stop-color="#ffe6b0" stop-opacity=".6"/>
+          <stop offset=".55" stop-color="#ffcf7a" stop-opacity=".2"/>
+          <stop offset="1" stop-color="#ffcf7a" stop-opacity="0"/>
+        </radialGradient>
+        <pattern id="cap" width="64" height="64" patternUnits="userSpaceOnUse">
+          <path d="M0 32 L32 0 L64 32 L32 64 Z" fill="none" stroke="#2a170c" stroke-width="2.4" opacity=".8"/>
+          <path d="M0 31 L32 0 L64 31" fill="none" stroke="#8a5a36" stroke-width="1.1" opacity=".5"/>
+          <circle cx="32" cy="0" r="5.2" fill="#241207"/>
+          <circle cx="0" cy="32" r="5.2" fill="#241207"/>
+          <circle cx="64" cy="32" r="5.2" fill="#241207"/>
+          <circle cx="32" cy="64" r="5.2" fill="#241207"/>
+          <circle cx="32" cy="-1.6" r="1.6" fill="#c08a5c" opacity=".45"/>
+          <circle cx="-1.6" cy="30.4" r="1.6" fill="#c08a5c" opacity=".45"/>
+          <circle cx="62.4" cy="30.4" r="1.6" fill="#c08a5c" opacity=".45"/>
+          <circle cx="30.4" cy="62.4" r="1.6" fill="#c08a5c" opacity=".45"/>
+        </pattern>
+        <clipPath id="leafCl"><rect x="22" y="20" width="296" height="567" rx="7"/></clipPath>
+      </defs>
+
+      <rect x="2" y="0" width="336" height="607" rx="10" fill="url(#frame)"/>
+      <rect x="2" y="0" width="336" height="607" rx="10" fill="none" stroke="#120a05" stroke-width="2.5"/>
+
+      <rect x="22" y="20" width="296" height="567" rx="7" fill="url(#leather)"/>
+      <g clip-path="url(#leafCl)">
+        <rect x="22" y="20" width="296" height="567" fill="url(#cap)" opacity=".55"/>
+        <rect x="22" y="20" width="296" height="567" fill="url(#sheen)"/>
+      </g>
+      <rect x="22" y="20" width="296" height="567" rx="7" fill="none" stroke="#1c0e05" stroke-width="16" opacity=".35"/>
+
+      <rect x="46" y="46" width="248" height="515" rx="12" fill="none" stroke="#2a170c" stroke-width="7"/>
+      <rect x="46" y="46" width="248" height="515" rx="12" fill="none" stroke="#7d4f2e" stroke-width="2" opacity=".7"/>
+
+      <g fill="#241307" stroke="#0f0803" stroke-width="1">
+        <rect x="14" y="96" width="14" height="58" rx="4"/>
+        <rect x="14" y="272" width="14" height="58" rx="4"/>
+        <rect x="14" y="448" width="14" height="58" rx="4"/>
+      </g>
+
+      <!-- акцент: табличка 197 -->
+      <g class="numplate">
+        <ellipse cx="178" cy="130" rx="122" ry="84" fill="url(#warm)" class="plateglow"/>
+        <rect x="99" y="97" width="164" height="84" rx="6" fill="#000" opacity=".38"/>
+        <rect x="96" y="88" width="164" height="84" rx="6" fill="url(#enamel)" stroke="#6d6350" stroke-width="2"/>
+        <rect x="101" y="93" width="154" height="20" rx="3" fill="#ffffff" opacity=".35"/>
+        <rect x="102" y="92" width="152" height="76" rx="4" fill="none" stroke="#b8ab90" stroke-width="1"/>
+        <text x="178" y="151" text-anchor="middle" font-family="Georgia,'Times New Roman',serif"
+              font-size="58" font-weight="700" letter-spacing="6" fill="#1d160e">197</text>
+      </g>
+
+      <!-- глазок -->
+      <g>
+        <circle cx="170" cy="311" r="31" fill="#000" opacity=".38"/>
+        <circle cx="170" cy="307" r="27" fill="url(#brass)" stroke="#3a2a08" stroke-width="2"/>
+        <circle cx="170" cy="307" r="20" fill="#a8861d"/>
+        <circle cx="170" cy="307" r="16.5" fill="#0d0906"/>
+        <ellipse cx="163" cy="299" rx="6" ry="4" fill="#ffe9b8" opacity=".5" transform="rotate(-25 163 299)"/>
+      </g>
+
+      <!-- ручка -->
+      <g>
+        <circle cx="298" cy="336" r="21" fill="#000" opacity=".32"/>
+        <circle cx="296" cy="330" r="15" fill="url(#brass)" stroke="#3a2a08" stroke-width="2"/>
+        <circle cx="296" cy="330" r="7" fill="#8f6f14"/>
+        <circle cx="291" cy="325" r="3.4" fill="#ffe9b8" opacity=".55"/>
+      </g>
+
+      <path d="M2 607 L338 607 L320 592 L20 592 Z" fill="#000" opacity=".55"/>
+    </svg>
+  </div>
+  <div class="glow"></div>
+  <div class="bar"><i></i></div>
+  <div class="hint">Счётчики · кв. 197</div>
+</div>
+
+<header id="appHeader"></header>
+<main id="main"></main>
+<nav class="tabs" id="tabs"></nav>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+'use strict';
+/* ==== Счётчики: чистая логика (без DOM) ==== */
+
+var COUNTERS = [
+  { key: 'hv_toilet',  name: 'Холодная вода — туалет', short: 'ХВС туалет', unit: 'м³', res: 'cold', acc: '367312067' },
+  { key: 'gv_toilet',  name: 'Горячая вода — туалет',  short: 'ГВС туалет', unit: 'м³', res: 'hot',  acc: '367301428' },
+  { key: 'hv_kitchen', name: 'Холодная вода — кухня',  short: 'ХВС кухня',  unit: 'м³', res: 'cold', acc: '367310054' },
+  { key: 'gv_kitchen', name: 'Горячая вода — кухня',   short: 'ГВС кухня',  unit: 'м³', res: 'hot',  acc: '367310044' },
+  { key: 'elec',       name: 'Электроэнергия',         short: 'Свет',       unit: 'кВт·ч', res: 'elec', acc: '' },
+  { key: 'gas',        name: 'Газ',                    short: 'Газ',        unit: 'м³', res: 'gas',  acc: '' }
+];
+
+var RESOURCES = {
+  elec: { key: 'elec', name: 'Электроэнергия', short: 'Электро', unit: 'кВт·ч', priceKey: 'elec', color: '#d9b53c' },
+  cold: { key: 'cold', name: 'Холодная вода (сумма)', short: 'ХВС', unit: 'м³', priceKey: 'cold', color: '#5aa9c9' },
+  hot:  { key: 'hot',  name: 'Горячая вода (сумма)',  short: 'ГВС', unit: 'м³', priceKey: 'hot',  color: '#d0714f' },
+  gas:  { key: 'gas',  name: 'Газ', short: 'Газ', unit: 'м³', priceKey: 'gas', color: '#9a8fd0' }
+};
+var RES_ORDER = ['elec', 'cold', 'hot', 'gas'];
+
+var MONTHS_RU = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+var MONTHS_SHORT = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+
+function round(n, digits) {
+  var f = Math.pow(10, digits === undefined ? 2 : digits);
+  return Math.round(n * f) / f;
+}
+
+/* 'YYYY-MM' */
+function monthKey(y, m) {
+  m = Number(m);
+  return y + '-' + (m < 10 ? '0' + m : '' + m);
+}
+function monthParts(mk) {
+  var p = String(mk).split('-');
+  return { y: Number(p[0]), m: Number(p[1]) };
+}
+function monthIndex(mk) {
+  var p = monthParts(mk);
+  return p.y * 12 + (p.m - 1);
+}
+function addMonths(mk, d) {
+  var i = monthIndex(mk) + d;
+  return monthKey(Math.floor(i / 12), (i % 12) + 1);
+}
+function monthLabel(mk) {
+  var p = monthParts(mk);
+  return MONTHS_RU[p.m - 1] + ' ' + p.y;
+}
+function monthShort(mk) {
+  var p = monthParts(mk);
+  return MONTHS_SHORT[p.m - 1] + ' ' + String(p.y).slice(2);
+}
+function currentMonth() {
+  var d = new Date();
+  return monthKey(d.getFullYear(), d.getMonth() + 1);
+}
+
+/* Ввод: "533,5" / "533.5" / "1 234,5" -> число | null */
+function parseNum(v) {
+  if (v === null || v === undefined) return null;
+  var s = String(v).replace(/[\s\u00a0]/g, '').replace(',', '.');
+  if (s === '') return null;
+  if (!/^-?\d+(\.\d+)?$/.test(s)) return NaN;
+  var n = Number(s);
+  return isFinite(n) ? n : NaN;
+}
+
+function sortedMonths(records) {
+  return Object.keys(records)
+    .filter(function (m) { return /^\d{4}-\d{2}$/.test(m); })
+    .sort(function (a, b) { return monthIndex(a) - monthIndex(b); });
+}
+
+function hasData(records, mk) {
+  var r = records[mk];
+  if (!r) return false;
+  return COUNTERS.some(function (c) { return typeof r[c.key] === 'number' && isFinite(r[c.key]); });
+}
+
+/* ближайший предыдущий месяц, где есть это показание */
+function prevValue(records, mk, key) {
+  var ms = sortedMonths(records);
+  var target = monthIndex(mk);
+  var best = null;
+  for (var i = 0; i < ms.length; i++) {
+    if (monthIndex(ms[i]) >= target) break;
+    var v = records[ms[i]][key];
+    if (typeof v === 'number' && isFinite(v)) best = { month: ms[i], value: v };
+  }
+  return best;
+}
+
+function usage(records, mk, key) {
+  var r = records[mk];
+  if (!r) return null;
+  var cur = r[key];
+  if (typeof cur !== 'number' || !isFinite(cur)) return null;
+  var pv = prevValue(records, mk, key);
+  if (!pv) return null;
+  return round(cur - pv.value, 3);
+}
+
+/* расход по ресурсу; для воды — сумма двух точек по тем, где есть база */
+function resourceUsage(records, mk, res) {
+  if (res === 'elec' || res === 'gas') return usage(records, mk, res);
+  var keys = COUNTERS.filter(function (c) { return c.res === res; }).map(function (c) { return c.key; });
+  var total = 0, any = false;
+  keys.forEach(function (k) {
+    var u = usage(records, mk, k);
+    if (u !== null) { total += u; any = true; }
+  });
+  return any ? round(total, 3) : null;
+}
+
+/* все ли точки ресурса имеют базу (для пометки «неполная сумма») */
+function resComplete(records, mk, res) {
+  if (res === 'elec' || res === 'gas') return usage(records, mk, res) !== null;
+  return COUNTERS.filter(function (c) { return c.res === res; })
+    .every(function (c) { return usage(records, mk, c.key) !== null; });
+}
+
+/* СУММА ПОКАЗАНИЙ ресурса: туалет + кухня (как в таблице на бумаге) */
+function readingsSum(records, mk, res) {
+  var r = records[mk] || {};
+  var keys = COUNTERS.filter(function (c) { return c.res === res; }).map(function (c) { return c.key; });
+  var known = keys.map(function (k) { return r[k]; })
+    .filter(function (v) { return typeof v === 'number' && isFinite(v); });
+  return {
+    sum: known.length ? round(known.reduce(function (a, b) { return a + b; }, 0), 3) : null,
+    count: known.length,
+    of: keys.length
+  };
+}
+
+/* сумма показаний по произвольным значениям (для живого пересчёта в форме) */
+function sumValues(vals) {
+  var known = vals.filter(function (v) { return typeof v === 'number' && isFinite(v); });
+  return { sum: known.length ? round(known.reduce(function (a, b) { return a + b; }, 0), 3) : null, count: known.length, of: vals.length };
+}
+
+/* тариф, действующий в месяце: последняя версия с from <= month */
+function tariffFor(tariffs, mk) {
+  if (!tariffs || !tariffs.length) return null;
+  var idx = monthIndex(mk);
+  var best = null;
+  tariffs.forEach(function (t) {
+    if (!t || !t.from) return;
+    if (monthIndex(t.from) <= idx) {
+      if (!best || monthIndex(t.from) > monthIndex(best.from)) best = t;
+    }
+  });
+  if (!best) {
+    var sorted = tariffs.slice().filter(function (t) { return t && t.from; })
+      .sort(function (a, b) { return monthIndex(a.from) - monthIndex(b.from); });
+    best = sorted[0] || null;
+  }
+  return best;
+}
+
+/* Полный расчёт месяца */
+function monthSummary(data, mk) {
+  var records = data.records || {};
+  var tariffs = data.tariffs || [];
+  var t = tariffFor(tariffs, mk);
+  var out = { month: mk, readings: {}, usage: {}, res: {}, total: 0, complete: true, tariff: t, hasRecord: hasData(records, mk) };
+
+  COUNTERS.forEach(function (c) {
+    var r = records[mk] || {};
+    out.readings[c.key] = (typeof r[c.key] === 'number' && isFinite(r[c.key])) ? r[c.key] : null;
+    out.usage[c.key] = usage(records, mk, c.key);
+  });
+
+  var sum = 0;
+  RES_ORDER.forEach(function (rk) {
+    var u = resourceUsage(records, mk, rk);
+    var price = t ? t[RESOURCES[rk].priceKey] : null;
+    var cost = null;
+    if (u !== null && typeof price === 'number' && isFinite(price)) cost = round(u * price, 2);
+    out.res[rk] = { usage: u, price: (typeof price === 'number' ? price : null), cost: cost,
+                    complete: resComplete(records, mk, rk),
+                    readings: readingsSum(records, mk, rk) };
+    if (cost === null) out.complete = false; else sum += cost;
+  });
+  out.total = out.hasRecord ? round(sum, 2) : null;
+  if (out.total === 0 && !out.complete) out.total = null;
+  return out;
+}
+
+function series(data) {
+  return sortedMonths(data.records || {}).map(function (m) { return monthSummary(data, m); });
+}
+
+/* статистика по выбранному ряду */
+function statsFor(data, key) {
+  var list = series(data).map(function (s) {
+    if (key === 'total') return { month: s.month, value: s.total };
+    return { month: s.month, value: s.res[key] ? s.res[key].usage : null };
+  }).filter(function (p) { return p.value !== null && p.value !== undefined; });
+
+  if (!list.length) return { values: [], avg: null, last: null, prev: null, delta: null };
+  var sum = list.reduce(function (a, p) { return a + p.value; }, 0);
+  var last = list[list.length - 1], prev = list.length > 1 ? list[list.length - 2] : null;
+  return {
+    values: list,
+    avg: round(sum / list.length, 2),
+    last: last,
+    prev: prev,
+    delta: prev && prev.value ? round((last.value - prev.value) / prev.value * 100, 1) : null
+  };
+}
+
+/* Форматирование чисел по-русски */
+function fmt(n, digits) {
+  if (n === null || n === undefined || !isFinite(n)) return '—';
+  var d = digits === undefined ? 2 : digits;
+  var neg = n < 0 ? '−' : '';
+  var s = Math.abs(n).toFixed(d);
+  var parts = s.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+  var out = parts[0];
+  if (d > 0) out += ',' + parts[1];
+  return neg + out;
+}
+function fmtMoney(n) {
+  if (n === null || n === undefined || !isFinite(n)) return '—';
+  return fmt(n, 2) + '\u00a0₽';
+}
+function fmtUsage(n, unit) {
+  if (n === null || n === undefined || !isFinite(n)) return '—';
+  var digits = Math.abs(n) % 1 < 0.0001 ? 0 : 2;
+  return fmt(n, digits) + '\u00a0' + unit;
+}
+
+/* CSV-экспорт */
+function toCSV(data) {
+  var rows = [];
+  rows.push(['Месяц'].concat(COUNTERS.map(function (c) { return c.name + ', ' + c.unit; }))
+    .concat(RES_ORDER.map(function (r) { return 'Расход ' + RESOURCES[r].name; }))
+    .concat(RES_ORDER.map(function (r) { return 'Сумма ' + RESOURCES[r].name + ', ₽'; }))
+    .concat(['Итого, ₽']));
+  series(data).forEach(function (s) {
+    var row = [s.month];
+    COUNTERS.forEach(function (c) { row.push(s.readings[c.key] === null ? '' : String(s.readings[c.key]).replace('.', ',')); });
+    RES_ORDER.forEach(function (r) { row.push(s.res[r].usage === null ? '' : String(s.res[r].usage).replace('.', ',')); });
+    RES_ORDER.forEach(function (r) { row.push(s.res[r].cost === null ? '' : String(s.res[r].cost).replace('.', ',')); });
+    row.push(s.total === null ? '' : String(s.total).replace('.', ','));
+    rows.push(row);
+  });
+  return rows.map(function (r) {
+    return r.map(function (cell) {
+      var v = String(cell);
+      return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    }).join(';');
+  }).join('\r\n');
+}
+
+</script>
+<script>
+'use strict';
+/* ==== Счётчики: интерфейс ==== */
+
+/* Ловим ошибки, чтобы приложение не «висело» молча */
+window.addEventListener('error', function (ev) {
+  try {
+    var s = document.getElementById('splash');
+    if (s) s.classList.add('gone');
+    var box = document.getElementById('errbox');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'errbox';
+      box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:92px;z-index:2000;background:#5a1f1f;color:#ffeeee;padding:10px 12px;border-radius:10px;font:12px/1.4 monospace;white-space:pre-wrap;max-height:38vh;overflow:auto';
+      document.body.appendChild(box);
+      box.addEventListener('click', function () { box.remove(); });
+    }
+    box.textContent = 'Ошибка: ' + (ev.message || ev.error) + '\n' + (ev.filename || '').split('/').pop() + ' : ' + (ev.lineno || '');
+  } catch (e) {}
+});
+
+var LS_KEY = 'meters_v1';
+var storageOk = true;
+
+function defaultData() {
+  return {
+    v: 1,
+    records: {},
+    tariffs: [{ from: currentMonth(), elec: 6.5, cold: 60, hot: 200, gas: 8 }],
+    accounts: {
+      hv_toilet: '367312067', gv_toilet: '367301428',
+      hv_kitchen: '367310054', gv_kitchen: '367310044'
+    },
+    settings: { splash: true }
+  };
+}
+
+function loadData() {
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      var d = JSON.parse(raw);
+      if (d && typeof d === 'object') {
+        d.records = d.records || {};
+        d.tariffs = (d.tariffs && d.tariffs.length) ? d.tariffs : defaultData().tariffs;
+        d.accounts = d.accounts || defaultData().accounts;
+        d.settings = d.settings || { splash: true };
+        return d;
+      }
+    }
+  } catch (e) { storageOk = false; }
+  return defaultData();
+}
+
+var state = {
+  data: loadData(),
+  tab: 'input',
+  month: currentMonth(),
+  chartRes: 'total',
+  open: {}
+};
+
+function persist() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state.data)); storageOk = true; }
+  catch (e) { storageOk = false; }
+}
+
+function $(id) { return document.getElementById(id); }
+function esc(s) {
+  return String(s === null || s === undefined ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function numOr0(n) { return (typeof n === 'number' && isFinite(n)) ? n : 0; }
+
+/* ---------- тост ---------- */
+var toastTimer = null;
+function toast(msg) {
+  var t = $('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
+}
+
+/* ================= ШАПКА ================= */
+function renderHeader() {
+  var h = $('appHeader');
+  if (!h) return;
+  if (state.tab === 'input') {
+    h.innerHTML =
+      '<div class="brand">' +
+        '<div class="plate">197</div>' +
+        '<div><h1>Счётчики</h1><small>ХВС, ГВС, свет, газ</small></div>' +
+      '</div>' +
+      '<div class="monthbar">' +
+        '<button class="nav" data-act="prev-month" aria-label="Предыдущий месяц">‹</button>' +
+        '<button class="mbtn" data-act="pick-month">' + esc(monthLabel(state.month)) + '</button>' +
+        '<button class="nav" data-act="next-month" aria-label="Следующий месяц">›</button>' +
+      '</div>';
+  } else if (state.tab === 'archive') {
+    h.innerHTML =
+      '<div class="brand"><div class="plate">197</div>' +
+      '<div><h1>Архив</h1><small>Все месяцы и суммы</small></div></div>';
+  } else if (state.tab === 'chart') {
+    h.innerHTML =
+      '<div class="brand"><div class="plate">197</div>' +
+      '<div><h1>График</h1><small>Расход и стоимость по месяцам</small></div></div>';
+  } else {
+    h.innerHTML =
+      '<div class="brand"><div class="plate">197</div>' +
+      '<div><h1>Настройки</h1><small>Тарифы, лицевые счета, данные</small></div></div>';
+  }
+}
+
+/* ================= ВВОД ================= */
+function sumCard(s) {
+  if (!s.hasRecord) return '';
+  var rows = RES_ORDER.map(function (rk) {
+    var r = s.res[rk], def = RESOURCES[rk];
+    var detail = '';
+    var sumLine = '';
+    if (rk === 'cold' || rk === 'hot') {
+      var parts = COUNTERS.filter(function (c) { return c.res === rk; }).map(function (c) {
+        var u = s.usage[c.key];
+        return (c.short.split(' ')[1] || '') + ' ' + (u === null ? '—' : fmt(u, Math.abs(u) % 1 < 0.0001 ? 0 : 2));
+      });
+      detail = 'расход: ' + parts.join(' + ');
+      if (r.readings && r.readings.sum !== null) {
+        var reads = COUNTERS.filter(function (c) { return c.res === rk; }).map(function (c) {
+          return s.readings[c.key] === null ? '—' : fmt(s.readings[c.key], 0);
+        });
+        sumLine = '<div class="d" style="color:#d7c9b6">показания ' + fmt(r.readings.sum, 0) +
+          ' <span class="muted">=' + esc(reads.join('+')) + '</span></div>';
+      }
+    } else {
+      detail = r.usage === null ? 'нужна база за прошлый месяц' : def.unit + ' за месяц';
+    }
+    return '<div class="item">' +
+      '<div class="k"><span class="dot" style="background:' + def.color + '"></span>' + esc(def.short) + '</div>' +
+      '<div class="v">' + fmtMoney(r.cost) + '</div>' +
+      '<div class="d">' + (r.usage === null ? '—' : fmtUsage(r.usage, def.unit)) +
+        (r.complete ? '' : ' <span style="color:#e3a15b">(неполный)</span>') + '</div>' +
+      sumLine +
+      '<div class="d" style="opacity:.75">' + esc(detail) + '</div>' +
+    '</div>';
+  }).join('');
+
+  return '<div class="card"><h2>Расчёт за ' + esc(monthLabel(s.month)) + '</h2>' +
+    '<div class="sum">' + rows + '</div>' +
+    '<div class="total"><span class="lbl">Итого к оплате</span><span class="val">' + fmtMoney(s.total) + '</span></div>' +
+    (s.complete ? '' : '<div class="note" style="margin-top:6px">Итог без тех ресурсов, где пока нет базы за прошлый месяц.</div>') +
+    (s.complete ? '' : '<div class="note" style="margin-top:8px">Часть сумм не посчитана: нет показаний за предыдущий месяц или не задан тариф. Внесите базу — дальше расход будет считаться автоматически.</div>') +
+  '</div>';
+}
+
+function valOf(key) {
+  var inp = $('in_' + key);
+  if (!inp) return null;
+  var n = parseNum(inp.value);
+  return (n === null || isNaN(n)) ? null : n;
+}
+
+function liveSumsHTML() {
+  var water = ['cold', 'hot'].map(function (rk) {
+    var def = RESOURCES[rk];
+    var parts = COUNTERS.filter(function (c) { return c.res === rk; });
+    var vals = parts.map(function (c) { return valOf(c.key); });
+    var s = sumValues(vals);
+    var detail = parts.map(function (c, i) {
+      return c.short.split(' ')[1] + ' ' + (vals[i] === null ? '—' : fmt(vals[i], 0));
+    }).join(' + ');
+    return '<div class="tline"><span class="nm"><span class="dot" style="background:' + def.color + ';margin-right:6px"></span>' +
+      esc(def.short) + '</span>' +
+      '<span style="font-weight:700;font-variant-numeric:tabular-nums">' +
+      (s.sum === null ? '—' : fmt(s.sum, 2)) + ' ' + def.unit + '</span></div>' +
+      '<div class="note" style="margin:-2px 0 8px">' + esc(detail) + '</div>';
+  }).join('');
+  var others = ['elec', 'gas'].map(function (rk) {
+    var def = RESOURCES[rk], v = valOf(rk);
+    return '<div class="tline"><span class="nm"><span class="dot" style="background:' + def.color + ';margin-right:6px"></span>' +
+      esc(def.short) + '</span><span style="font-variant-numeric:tabular-nums">' +
+      (v === null ? '—' : fmt(v, 0)) + ' ' + def.unit + '</span></div>';
+  }).join('');
+  return water + others;
+}
+
+function updateLiveSums() {
+  var box = $('liveSums');
+  if (box) box.innerHTML = liveSumsHTML();
+}
+
+function viewInput() {
+  var mk = state.month;
+  var rec = state.data.records[mk] || {};
+  var has = hasData(state.data.records, mk);
+  var prevMonth = null;
+  var ms = sortedMonths(state.data.records).filter(function (m) { return monthIndex(m) < monthIndex(mk); });
+  if (ms.length) prevMonth = ms[ms.length - 1];
+
+  var fields = COUNTERS.map(function (c) {
+    var v = (typeof rec[c.key] === 'number') ? String(rec[c.key]).replace('.', ',') : '';
+    var pv = prevValue(state.data.records, mk, c.key);
+    var acc = state.data.accounts[c.key] || '';
+    return '<div class="field" data-field="' + c.key + '">' +
+      '<div class="top"><div class="name">' + esc(c.name) + '</div>' +
+      (acc ? '<div class="acc">л/с ' + esc(acc) + '</div>' : '') + '</div>' +
+      '<div class="row">' +
+        '<input type="text" inputmode="decimal" id="in_' + c.key + '" value="' + esc(v) + '" ' +
+          'placeholder="' + (pv ? esc(String(pv.value).replace('.', ',')) : '—') + '" aria-label="' + esc(c.name) + '">' +
+        '<div class="unit">' + esc(c.unit) + '</div>' +
+      '</div>' +
+      '<div class="prev"><span>Предыдущее: <b>' + (pv ? fmt(pv.value, Math.abs(pv.value) % 1 < 0.0001 ? 0 : 2) + ' (' + esc(monthShort(pv.month)) + ')' : 'нет') + '</b></span>' +
+        '<span class="warn" id="warn_' + c.key + '"></span></div>' +
+    '</div>';
+  }).join('');
+
+  var s = monthSummary(state.data, mk);
+
+  return (storageOk ? '' : '<div class="banner">Браузер не даёт сохранить данные на диск. Работайте и сразу выгружайте бэкап в настройках.</div>') +
+    (has ? '' : '<div class="banner">' + (prevMonth
+      ? 'За ' + esc(monthLabel(mk)) + ' показаний ещё нет. Внесите их — расход посчитается от ' + esc(monthLabel(prevMonth)) + '.'
+      : 'Это первый месяц. Внесите текущие показания как базу — расход появится со следующего месяца.') + '</div>') +
+    '<div class="card"><h2>Показания</h2>' + fields + '</div>' +
+    '<div class="card"><h2>Сумма показаний</h2><div id="liveSums"></div>' +
+      '<div class="note" style="margin-top:6px">ХВС и ГВС складываются из двух точек: туалет + кухня. Пересчитывается сразу при вводе.</div></div>' +
+    '<button class="btn" data-act="save">' + (has ? 'Обновить показания' : 'Сохранить показания') + '</button>' +
+    (has ? '<div style="height:8px"></div><button class="btn danger sm" data-act="del-month">Удалить запись за ' + esc(monthLabel(mk)) + '</button>' : '') +
+    '<div style="height:12px"></div>' +
+    sumCard(s) +
+    (has ? '' : '<div class="note">После сохранения все шесть значений попадут в архив, а расход и суммы посчитаются по тарифу, действующему в этом месяце.</div>');
+}
+
+/* ================= АРХИВ ================= */
+function viewArchive() {
+  var list = series(state.data).slice().reverse();
+  if (!list.length) {
+    return '<div class="card"><h2>Пока пусто</h2><div class="note">Внесите показания на вкладке «Ввод» — записи появятся здесь.</div></div>' +
+      '<button class="btn" data-act="goto-input">Перейти к вводу</button>';
+  }
+  var cards = list.map(function (s) {
+    var open = !!state.open[s.month];
+    var rows = COUNTERS.map(function (c) {
+      var v = s.readings[c.key];
+      return '<tr><td>' + esc(c.short) + '</td><td>' + (v === null ? '—' : fmt(v, 0)) + ' ' + esc(c.unit) + '</td></tr>';
+    }).join('');
+    var res = RES_ORDER.map(function (rk) {
+      var r = s.res[rk], def = RESOURCES[rk];
+      return '<tr><td><span class="dot" style="background:' + def.color + ';margin-right:6px"></span>' + esc(def.short) +
+        ' <span class="muted small">' + (r.usage === null ? '' : fmt(r.usage, 0) + ' ' + def.unit) + '</span></td>' +
+        '<td>' + fmtMoney(r.cost) + '</td></tr>';
+    }).join('');
+    var sc = s.res.cold.readings, sh = s.res.hot.readings;
+    var sumsLine = '';
+    if ((sc && sc.sum !== null) || (sh && sh.sum !== null)) {
+      sumsLine = '<div class="note" style="margin:9px 0 0">Сумма показаний: ХВС <b>' +
+        (sc && sc.sum !== null ? fmt(sc.sum, 0) : '—') + '</b> · ГВС <b>' +
+        (sh && sh.sum !== null ? fmt(sh.sum, 0) : '—') + '</b></div>';
+    }
+    return '<div class="arch' + (open ? ' open' : '') + '">' +
+      '<div class="head" data-act="toggle-arch" data-month="' + s.month + '">' +
+        '<div><div class="m">' + esc(monthLabel(s.month)) + '</div>' +
+        '<div class="small muted">' + (s.total === null ? 'нет расчёта' : fmtMoney(s.total)) + '</div></div>' +
+        '<div class="t">' + (s.total === null ? '—' : fmtMoney(s.total)) + '</div>' +
+      '</div>' +
+      '<div class="body">' + sumsLine +
+        '<table>' + rows + '<tr class="grp"><td>Итого по ресурсам</td><td>' + fmtMoney(s.total) + '</td></tr>' + res + '</table>' +
+        '<div class="acts">' +
+          '<button class="btn ghost sm" data-act="edit-month" data-month="' + s.month + '">Изменить</button>' +
+          '<button class="btn danger sm" data-act="del-record" data-month="' + s.month + '">Удалить</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var sum = list.reduce(function (a, s) { return a + numOr0(s.total); }, 0);
+  return '<div class="card"><h2>Всего записей: ' + list.length + '</h2>' +
+    '<div class="total" style="margin:0;padding:0;border:0"><span class="lbl">Сумма за всё время</span>' +
+    '<span class="val">' + fmtMoney(sum) + '</span></div></div>' +
+    cards +
+    '<button class="btn ghost sm" data-act="export-csv">Экспорт CSV</button>';
+}
+
+/* ================= ГРАФИК ================= */
+function chartSVG() {
+  var st = statsFor(state.data, state.chartRes);
+  var pts = st.values.slice(-12);
+  var isMoney = state.chartRes === 'total';
+  var unit = isMoney ? '₽' : (state.chartRes === 'elec' ? 'кВт·ч' : 'м³');
+  if (!pts.length) return '<div class="note">Нет данных для графика — нужно хотя бы два месяца с показаниями.</div>';
+
+  var bw = 24, gap = 22, padX = 14, top = 26;
+  var w = Math.max(pts.length * (bw + gap) + padX * 2, 320);
+  var h = 220, plotH = h - 74;
+  var maxv = 0;
+  pts.forEach(function (p) { if (p.value > maxv) maxv = p.value; });
+  if (!(maxv > 0)) maxv = 1;
+  var scale = function (v) { return plotH * v / maxv; };
+  var color = isMoney ? '#c9a227' : RESOURCES[state.chartRes].color;
+
+  var grid = '';
+  for (var g = 0; g <= 2; g++) {
+    var y = top + plotH * g / 2;
+    grid += '<line x1="' + padX + '" y1="' + y + '" x2="' + (w - padX) + '" y2="' + y + '" stroke="#453529" stroke-width="1" stroke-dasharray="3 4"/>';
+    grid += '<text x="' + padX + '" y="' + (y - 4) + '" fill="#7d6d61" font-size="9">' + fmt(maxv * (1 - g / 2), 0) + '</text>';
+  }
+
+  var bars = pts.map(function (p, i) {
+    var x = padX + i * (bw + gap);
+    var bh = Math.max(2, scale(p.value));
+    var y = top + plotH - bh;
+    var lbl = '<text x="' + (x + bw / 2) + '" y="' + (h - 10) + '" text-anchor="middle" fill="#a8978a" font-size="10">' + esc(monthShort(p.month)) + '</text>';
+    var val = pts.length <= 8
+      ? '<text x="' + (x + bw / 2) + '" y="' + (y - 6) + '" text-anchor="middle" fill="#d7c9b6" font-size="9.5">' + fmt(p.value, 0) + '</text>'
+      : '';
+    return '<g><rect x="' + x + '" y="' + y + '" width="' + bw + '" height="' + bh + '" rx="4" fill="' + color + '" opacity="' + (i === pts.length - 1 ? '1' : '.72') + '"/>' + val + lbl + '</g>';
+  }).join('');
+
+  return '<div class="chartwrap"><svg class="chart" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" role="img" aria-label="График">' +
+    grid + bars + '</svg></div>' +
+    '<div class="note" style="margin-top:6px">Единица: ' + esc(unit) + '. Последние ' + pts.length + ' мес. Суммы — по тарифу каждого месяца.</div>';
+}
+
+function viewChart() {
+  var chips = [['total', 'Итого ₽']].concat(RES_ORDER.map(function (rk) { return [rk, RESOURCES[rk].short]; }));
+  var chipHtml = chips.map(function (c) {
+    return '<button class="chip' + (state.chartRes === c[0] ? ' on' : '') + '" data-act="chart-res" data-res="' + c[0] + '">' + esc(c[1]) + '</button>';
+  }).join('');
+
+  var st = statsFor(state.data, state.chartRes);
+  var unit = state.chartRes === 'total' ? '₽' : (state.chartRes === 'elec' ? 'кВт·ч' : 'м³');
+  var money = state.chartRes === 'total';
+
+  var stats = '<div class="stats">' +
+    '<div class="s"><div class="k">Среднее</div><div class="v">' + (st.avg === null ? '—' : (money ? fmtMoney(st.avg) : fmt(st.avg, 0) + ' ' + unit)) + '</div></div>' +
+    '<div class="s"><div class="k">Последний</div><div class="v">' + (st.last ? (money ? fmtMoney(st.last.value) : fmt(st.last.value, 0) + ' ' + unit) : '—') + '</div></div>' +
+    '<div class="s"><div class="k">К прошлому</div><div class="v" style="color:' + (st.delta === null ? '#a8978a' : (st.delta > 0 ? '#e3a15b' : '#8fbf63')) + '">' +
+      (st.delta === null ? '—' : (st.delta > 0 ? '+' : '') + fmt(st.delta, 1) + '%') + '</div></div>' +
+  '</div>';
+
+  return '<div class="chips">' + chipHtml + '</div>' +
+    '<div class="card">' + chartSVG() + stats + '</div>' +
+    '<div class="card"><h2>Таблица значений</h2>' +
+      (st.values.length ? '<table style="width:100%;border-collapse:collapse;font-size:13.5px">' +
+        st.values.slice().reverse().map(function (p) {
+          return '<tr><td style="padding:6px 0;border-bottom:1px solid #3a2d24">' + esc(monthLabel(p.month)) + '</td>' +
+            '<td style="text-align:right;padding:6px 0;border-bottom:1px solid #3a2d24">' +
+            (money ? fmtMoney(p.value) : fmt(p.value, 2) + ' ' + unit) + '</td></tr>';
+        }).join('') + '</table>'
+        : '<div class="note">Пока нет посчитанных месяцев.</div>') +
+    '</div>';
+}
+
+/* ================= НАСТРОЙКИ ================= */
+function viewSettings() {
+  var t = state.data.tariffs.slice().sort(function (a, b) { return monthIndex(b.from) - monthIndex(a.from); });
+  var tRows = t.map(function (v, i) {
+    return '<div class="tver"><div><b style="text-transform:capitalize">с ' + esc(monthLabel(v.from)) + '</b><br>' +
+      '<span class="muted">свет ' + fmt(v.elec, 2) + ' · ХВС ' + fmt(v.cold, 2) + ' · ГВС ' + fmt(v.hot, 2) + ' · газ ' + fmt(v.gas, 2) + '</span></div>' +
+      '<button class="btn ghost sm" style="width:auto;padding:0 10px" data-act="edit-tariff" data-i="' + state.data.tariffs.indexOf(v) + '">Изм.</button></div>';
+  }).join('');
+
+  var accRows = ['hv_toilet', 'gv_toilet', 'hv_kitchen', 'gv_kitchen'].map(function (k) {
+    var c = COUNTERS.filter(function (x) { return x.key === k; })[0];
+    return '<div class="tline"><span class="nm">л/с · ' + esc(c.short) + '</span>' +
+      '<input type="tel" data-acc="' + k + '" value="' + esc(state.data.accounts[k] || '') + '" style="width:140px;text-align:left"></div>';
+  }).join('');
+
+  var curTariff = tariffFor(state.data.tariffs, state.month) || { elec: 0, cold: 0, hot: 0, gas: 0 };
+
+  return '' +
+  '<div class="card"><h2>Тарифы, ₽</h2>' +
+    '<div class="tline"><span class="nm">Электроэнергия, ₽/кВт·ч</span><input type="text" inputmode="decimal" id="t_elec" value="' + esc(String(curTariff.elec).replace('.', ',')) + '"></div>' +
+    '<div class="tline"><span class="nm">Холодная вода, ₽/м³</span><input type="text" inputmode="decimal" id="t_cold" value="' + esc(String(curTariff.cold).replace('.', ',')) + '"></div>' +
+    '<div class="tline"><span class="nm">Горячая вода, ₽/м³</span><input type="text" inputmode="decimal" id="t_hot" value="' + esc(String(curTariff.hot).replace('.', ',')) + '"></div>' +
+    '<div class="tline"><span class="nm">Газ, ₽/м³</span><input type="text" inputmode="decimal" id="t_gas" value="' + esc(String(curTariff.gas).replace('.', ',')) + '"></div>' +
+    '<div class="note" style="margin:10px 0">Новая версия применяется с выбранного месяца; для более ранних месяцев остаются прежние цены.</div>' +
+    '<div class="tline"><span class="nm">Действует с</span><input type="month" id="t_from" value="' + esc(state.month) + '"></div>' +
+    '<div style="height:10px"></div><button class="btn sm" data-act="save-tariff">Сохранить версию тарифа</button>' +
+  '</div>' +
+  '<div class="card"><h2>История тарифов</h2>' + (tRows || '<div class="note">Нет тарифов.</div>') + '</div>' +
+  '<div class="card"><h2>Лицевые счета</h2>' + accRows + '</div>' +
+  '<div class="card"><h2>Данные</h2>' +
+    '<div class="btnrow"><button class="btn ghost sm" data-act="export-json">Бэкап JSON</button>' +
+    '<button class="btn ghost sm" data-act="import-json">Загрузить</button></div>' +
+    '<div style="height:8px"></div>' +
+    '<div class="btnrow"><button class="btn ghost sm" data-act="export-csv">Таблица CSV</button>' +
+    '<button class="btn ghost sm" data-act="show-backup">Показать текст</button></div>' +
+    '<div class="note" style="margin-top:10px">Данные хранятся только в этом браузере на телефоне. Раз в месяц выгружайте бэкап в папку «Загрузки» — очистка Chrome удалит показания.</div>' +
+    '<div style="height:10px"></div><button class="btn danger sm" data-act="clear-all">Очистить всё</button>' +
+  '</div>' +
+  '<div class="card"><h2>Заставка</h2>' +
+    '<div class="tline"><span class="nm">Показывать дверь при запуске</span>' +
+    '<button class="btn ghost sm" style="width:auto;padding:0 14px" data-act="toggle-splash">' + (state.data.settings.splash ? 'Вкл' : 'Выкл') + '</button></div>' +
+  '</div>' +
+  '<div class="note" style="text-align:center;padding:4px 0 8px">Счётчики 197 · офлайн-приложение</div>';
+}
+
+/* ================= РЕНДЕР ================= */
+function render() {
+  renderHeader();
+  var m = $('main');
+  if (!m) return;
+  if (state.tab === 'input') m.innerHTML = viewInput();
+  else if (state.tab === 'archive') m.innerHTML = viewArchive();
+  else if (state.tab === 'chart') m.innerHTML = viewChart();
+  else m.innerHTML = viewSettings();
+  renderTabs();
+  bindFields();
+  updateLiveSums();
+}
+
+var TABS = [
+  { id: 'input', label: 'Ввод', icon: '<path d="M12 5v14M5 12h14"/>' },
+  { id: 'archive', label: 'Архив', icon: '<path d="M4 7h16M6 7v12h12V7M9 4h6v3H9z"/><path d="M10 11h4M10 15h4"/>' },
+  { id: 'chart', label: 'График', icon: '<path d="M4 19V5M4 19h16"/><path d="M8 15v-4M12 15V8M16 15v-6"/>' },
+  { id: 'settings', label: 'Тарифы', icon: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>' }
+];
+
+function renderTabs() {
+  var n = $('tabs');
+  if (!n) return;
+  n.innerHTML = TABS.map(function (t) {
+    return '<button class="' + (state.tab === t.id ? 'on' : '') + '" data-act="tab" data-tab="' + t.id + '">' +
+      '<svg viewBox="0 0 24 24">' + t.icon + '</svg><span>' + t.label + '</span></button>';
+  }).join('');
+}
+
+/* ---------- проверка введённых значений ---------- */
+function fmtTxt(n) { return fmt(n, Math.abs(n) % 1 < 0.0001 ? 0 : 2); }
+
+/* шарик «Мои денюжки» улетает от кнопки */
+function flyMoneyBall() {
+  var b = document.createElement('div');
+  b.className = 'moneyball';
+  b.innerHTML =
+    '<span class="gloss"></span>' +
+    '<span class="mb-txt">Мои<br>денюжки</span>' +
+    '<span class="knot"></span>' +
+    '<svg class="mb-string" viewBox="0 0 20 54" aria-hidden="true">' +
+      '<path d="M10 0 C 18 10, 2 18, 10 28 C 18 38, 4 44, 9 54" fill="none" stroke="#2fa557" stroke-width="1.6" stroke-linecap="round"/>' +
+    '</svg>';
+  document.body.appendChild(b);
+  setTimeout(function () { if (b.parentNode) b.remove(); }, 3300);
+}
+
+/* «проверка дурака»: меньше прошлого или скачок на порядок */
+function validateReadings() {
+  var issues = [];
+  COUNTERS.forEach(function (c) {
+    var inp = $('in_' + c.key);
+    if (!inp) return;
+    var raw = inp.value.trim();
+    if (raw === '') return;
+    var n = parseNum(raw);
+    if (isNaN(n) || n < 0) { issues.push(c.short + ': не число'); return; }
+    var pv = prevValue(state.data.records, state.month, c.key);
+    if (!pv) return;
+    if (n < pv.value) {
+      issues.push(c.short + ': ' + fmtTxt(n) + ' меньше прошлого ' + fmtTxt(pv.value));
+    } else if (pv.value > 0 && n >= pv.value * 10) {
+      issues.push(c.short + ': ' + fmtTxt(n) + ' вместо ' + fmtTxt(pv.value) +
+        ' — в ' + Math.round(n / pv.value) + ' раза больше');
+    }
+  });
+  return issues;
+}
+
+function bindFields() {
+  COUNTERS.forEach(function (c) {
+    var inp = $('in_' + c.key);
+    if (!inp) return;
+    inp.addEventListener('input', function () {
+      var warn = $('warn_' + c.key);
+      var n = parseNum(inp.value);
+      var pv = prevValue(state.data.records, state.month, c.key);
+      inp.classList.remove('bad');
+      inp.classList.remove('sus');
+      if (warn) warn.textContent = '';
+      updateLiveSums();
+      if (!warn || inp.value.trim() === '') return;
+      if (isNaN(n)) { warn.textContent = 'не число'; inp.classList.add('bad'); return; }
+      if (n < 0) { warn.textContent = 'отрицательное'; inp.classList.add('bad'); return; }
+      if (!pv) return;
+      if (n < pv.value) {
+        warn.textContent = 'меньше прошлого (' + fmtTxt(pv.value) + ') — проверьте';
+        inp.classList.add('bad');
+        return;
+      }
+      if (pv.value > 0 && n >= pv.value * 10) {
+        warn.textContent = 'в ' + Math.round(n / pv.value) + ' раза больше (' + fmtTxt(pv.value) + ') — проверьте';
+        inp.classList.add('sus');
+      }
+    });
+  });
+  var accs = document.querySelectorAll('[data-acc]');
+  for (var i = 0; i < accs.length; i++) {
+    accs[i].addEventListener('change', function (e) {
+      state.data.accounts[e.target.getAttribute('data-acc')] = e.target.value.trim();
+      persist();
+      toast('Лицевой счёт сохранён');
+    });
+  }
+}
+
+/* ---------- сохранение показаний ---------- */
+function saveReadings(btn) {
+  var mk = state.month;
+  var obj = {};
+  var any = false, bad = false;
+  COUNTERS.forEach(function (c) {
+    var inp = $('in_' + c.key);
+    if (!inp) return;
+    var raw = inp.value.trim();
+    if (raw === '') return;
+    var n = parseNum(raw);
+    if (isNaN(n) || n < 0) { bad = true; return; }
+    obj[c.key] = round(n, 3);
+    any = true;
+  });
+  if (bad) { toast('Проверьте выделенные поля'); return; }
+  if (!any) { toast('Введите хотя бы одно показание'); return; }
+
+  /* проверка дурака: подтверждение при подозрительных числах */
+  var issues = validateReadings();
+  if (issues.length) {
+    if (!confirm('Проверьте показания:\n\n• ' + issues.join('\n• ') +
+      '\n\nЕсли всё введено верно, нажмите ОК.')) {
+      toast('Сохранение отменено');
+      return;
+    }
+  }
+
+  state.data.records[mk] = obj;
+  persist();
+  flyMoneyBall(btn);
+  toast('Сохранено: ' + monthLabel(mk));
+  render();
+}
+
+function deleteMonth(mk) {
+  delete state.data.records[mk];
+  persist();
+  toast('Запись удалена');
+  render();
+}
+
+/* ---------- скачивание файла ---------- */
+function download(name, text, mime) {
+  try {
+    var blob = new Blob([text], { type: mime || 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    return true;
+  } catch (e) { return false; }
+}
+
+function backupText() {
+  return JSON.stringify({
+    app: 'schetchiki-197', v: 1, exportedAt: new Date().toISOString(),
+    records: state.data.records, tariffs: state.data.tariffs,
+    accounts: state.data.accounts, settings: state.data.settings
+  }, null, 2);
+}
+
+/* ================= ДЕЙСТВИЯ ================= */
+function act(name, el) {
+  switch (name) {
+    case 'tab':
+      state.tab = el.getAttribute('data-tab');
+      render();
+      window.scrollTo(0, 0);
+      break;
+
+    case 'prev-month':
+      state.month = addMonths(state.month, -1); render(); break;
+    case 'next-month':
+      state.month = addMonths(state.month, 1); render(); break;
+
+    case 'pick-month': {
+      var host = el.parentNode;
+      host.innerHTML = '<input type="month" value="' + esc(state.month) + '">';
+      var inp = host.querySelector('input');
+      inp.focus();
+      inp.addEventListener('change', function () {
+        if (inp.value) state.month = inp.value;
+        render();
+      });
+      inp.addEventListener('blur', function () { setTimeout(render, 120); });
+      break;
+    }
+
+    case 'save': saveReadings(el); break;
+
+    case 'del-month':
+      if (confirm('Удалить показания за ' + monthLabel(state.month) + '?')) deleteMonth(state.month);
+      break;
+
+    case 'del-record': {
+      var mk = el.getAttribute('data-month');
+      if (confirm('Удалить запись за ' + monthLabel(mk) + '?')) deleteMonth(mk);
+      break;
+    }
+
+    case 'goto-input': state.tab = 'input'; render(); break;
+
+    case 'toggle-arch': {
+      var m2 = el.getAttribute('data-month');
+      state.open[m2] = !state.open[m2];
+      render();
+      break;
+    }
+
+    case 'edit-month':
+      state.month = el.getAttribute('data-month');
+      state.tab = 'input';
+      render(); window.scrollTo(0, 0);
+      break;
+
+    case 'chart-res':
+      state.chartRes = el.getAttribute('data-res');
+      render();
+      break;
+
+    case 'save-tariff': {
+      var from = $('t_from').value || state.month;
+      var vals = {};
+      var ok = true;
+      ['elec', 'cold', 'hot', 'gas'].forEach(function (k) {
+        var n = parseNum($('t_' + k).value);
+        if (isNaN(n) || n < 0) ok = false;
+        vals[k] = n;
+      });
+      if (!ok) { toast('Проверьте тарифы'); return; }
+      vals.from = from;
+      var idx = -1;
+      state.data.tariffs.forEach(function (t, i) { if (t.from === from) idx = i; });
+      if (idx >= 0) state.data.tariffs[idx] = vals; else state.data.tariffs.push(vals);
+      persist();
+      toast('Тариф с ' + monthLabel(from) + ' сохранён');
+      render();
+      break;
+    }
+
+    case 'edit-tariff': {
+      var i2 = Number(el.getAttribute('data-i'));
+      var t2 = state.data.tariffs[i2];
+      if (!t2) return;
+      $('t_elec').value = String(t2.elec).replace('.', ',');
+      $('t_cold').value = String(t2.cold).replace('.', ',');
+      $('t_hot').value = String(t2.hot).replace('.', ',');
+      $('t_gas').value = String(t2.gas).replace('.', ',');
+      $('t_from').value = t2.from;
+      window.scrollTo(0, 0);
+      toast('Заполнено — правьте и сохраняйте');
+      break;
+    }
+
+    case 'export-json': {
+      var fname = 'schetchiki-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      if (!download(fname, backupText(), 'application/json')) toast('Не удалось скачать — используйте «Показать текст»');
+      else toast('Файл сохранён в «Загрузки»');
+      break;
+    }
+
+    case 'export-csv': {
+      var csv = '\ufeff' + toCSV(state.data);
+      if (!download('schetchiki-' + new Date().toISOString().slice(0, 10) + '.csv', csv, 'text/csv;charset=utf-8')) toast('Не удалось скачать');
+      else toast('CSV сохранён в «Загрузки»');
+      break;
+    }
+
+    case 'show-backup': {
+      var txt = backupText();
+      var box = $('backupBox');
+      if (box) box.remove();
+      box = document.createElement('div');
+      box.id = 'backupBox';
+      box.className = 'card';
+      box.innerHTML = '<h2>Текст бэкапа</h2><div class="note" style="margin-bottom:8px">Выделите всё, скопируйте и сохраните в заметки или отправьте себе.</div>' +
+        '<textarea readonly style="width:100%;height:180px;border-radius:10px;border:1px solid #453529;background:#171210;color:#f2e9dc;padding:10px;font-size:11px">' + esc(txt) + '</textarea>' +
+        '<div style="height:8px"></div><button class="btn ghost sm" data-act="close-backup">Закрыть</button>';
+      $('main').prepend(box);
+      box.scrollIntoView({ behavior: 'smooth' });
+      break;
+    }
+    case 'close-backup': {
+      var b = $('backupBox'); if (b) b.remove(); break;
+    }
+
+    case 'import-json': {
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json,application/json';
+      input.onchange = function () {
+        var f = input.files && input.files[0];
+        if (!f) return;
+        var fr = new FileReader();
+        fr.onload = function () {
+          try {
+            var d = JSON.parse(String(fr.result));
+            if (!d || typeof d !== 'object' || !d.records) throw new Error('bad');
+            if (!confirm('Заменить текущие данные бэкапом (' + Object.keys(d.records).length + ' записей)?')) return;
+            state.data = {
+              v: 1,
+              records: d.records || {},
+              tariffs: (d.tariffs && d.tariffs.length) ? d.tariffs : defaultData().tariffs,
+              accounts: d.accounts || defaultData().accounts,
+              settings: d.settings || { splash: true }
+            };
+            persist(); toast('Данные загружены'); render();
+          } catch (e) { toast('Файл не подходит'); }
+        };
+        fr.readAsText(f);
+      };
+      input.click();
+      break;
+    }
+
+    case 'clear-all':
+      if (confirm('Удалить все показания, тарифы и счета? Действие нельзя отменить.')) {
+        state.data = defaultData();
+        persist(); toast('Всё очищено'); render();
+      }
+      break;
+
+    case 'toggle-splash':
+      state.data.settings.splash = !state.data.settings.splash;
+      persist(); render();
+      toast(state.data.settings.splash ? 'Заставка включена' : 'Заставка выключена');
+      break;
+  }
+}
+
+document.addEventListener('click', function (e) {
+  var el = e.target.closest ? e.target.closest('[data-act]') : null;
+  if (!el) return;
+  var name = el.getAttribute('data-act');
+  if (!name) return;
+  e.preventDefault();
+  act(name, el);
+});
+
+/* ================= ЗАСТАВКА ================= */
+(function splash() {
+  var sp = $('splash');
+  if (!sp) return;
+  if (state.data.settings && state.data.settings.splash === false) { sp.classList.add('gone'); return; }
+  sp.addEventListener('click', function () { sp.classList.add('gone'); });
+  /* страховка: даже если что-то пошло не так, заставка уйдёт сама */
+  setTimeout(function () { sp.classList.add('gone'); }, 3400);
+})();
+
+render();
+
+</script>
+<script>
+/* PWA: работает только по http(s), на file:// молча пропускаем */
+if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
